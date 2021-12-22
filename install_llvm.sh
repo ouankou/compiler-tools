@@ -30,7 +30,7 @@ cd $LLVM_SRC
 git clone -b release/$LLVM_VERSION.x https://github.com/llvm/llvm-project .
 cd $LLVM_BUILD
 if [ -z "$USE_GPU" ]; then
-    cmake -G Ninja -DLLVM_USE_LINKER=gold -DLLVM_ENABLE_RTTI=ON -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=$LLVM_PATH -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;compiler-rt;openmp;libcxx;libcxxabi" $LLVM_SRC/llvm
+    CC=gcc-11 CXX=g++-11 cmake -G Ninja -DLLVM_USE_LINKER=gold -DLLVM_ENABLE_RTTI=ON -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=$LLVM_PATH -DLLVM_ENABLE_PROJECTS="mlir;clang;clang-tools-extra;compiler-rt;openmp;libcxx;libcxxabi;lldb" -DLLVM_BUILD_EXAMPLES=ON $LLVM_SRC/llvm
 else
     CC=gcc-11 CXX=g++-11 cmake -G Ninja -DLLVM_USE_LINKER=gold -DLLVM_ENABLE_RTTI=ON -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=$LLVM_PATH -DLLVM_ENABLE_PROJECTS="mlir;clang;clang-tools-extra;compiler-rt;openmp;libcxx;libcxxabi;lldb" -DLLVM_TARGETS_TO_BUILD="host;NVPTX" $USE_GPU -DLLVM_BUILD_EXAMPLES=ON $LLVM_SRC/llvm
 fi
