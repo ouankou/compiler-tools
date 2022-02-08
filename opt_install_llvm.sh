@@ -28,15 +28,14 @@ mkdir -p $LLVM_BUILD
 sudo mkdir -p $LLVM_PATH
 
 cd $LLVM_SRC
-git clone https://github.com/llvm/llvm-project .
-#git clone -b release/$LLVM_VERSION.x https://github.com/llvm/llvm-project .
+git clone -b release/$LLVM_VERSION.x https://github.com/llvm/llvm-project .
 cd $LLVM_BUILD
-CC=gcc-11 CXX=g++-11 cmake -G Ninja -DLLVM_USE_LINKER=gold -DLLVM_ENABLE_RTTI=ON -DCMAKE_BUILD_TYPE=DEBUG -DCMAKE_INSTALL_PREFIX=$LLVM_PATH -DLLVM_ENABLE_PROJECTS="mlir;clang;clang-tools-extra;compiler-rt;openmp;libcxx;libcxxabi;lldb" -DLLVM_TARGETS_TO_BUILD="host;NVPTX" $USE_GPU -DLLVM_BUILD_EXAMPLES=ON -DLLVM_ENABLE_ASSERTIONS=OFF $LLVM_SRC/llvm
+CC=gcc CXX=g++ cmake -G Ninja -DLLVM_USE_LINKER=gold -DLLVM_ENABLE_RTTI=ON -DCMAKE_BUILD_TYPE=DEBUG -DCMAKE_INSTALL_PREFIX=$LLVM_PATH -DLLVM_ENABLE_PROJECTS="mlir;clang;clang-tools-extra;compiler-rt;openmp;lldb" -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi" -DLLVM_TARGETS_TO_BUILD="host;NVPTX" $USE_GPU -DLLVM_BUILD_EXAMPLES=ON -DLLVM_ENABLE_ASSERTIONS=OFF $LLVM_SRC/llvm
 
 ninja -j6 -l6
 sudo ninja install -j6
 
-CC=gcc-11 CXX=g++-11 cmake -G Ninja -DLLVM_USE_LINKER=gold -DLLVM_ENABLE_RTTI=ON -DCMAKE_BUILD_TYPE=DEBUG -DCMAKE_INSTALL_PREFIX=$LLVM_PATH -DLLVM_ENABLE_PROJECTS="mlir;clang;clang-tools-extra;compiler-rt;openmp;libcxx;libcxxabi;lldb" -DLLVM_TARGETS_TO_BUILD="host;NVPTX" $USE_GPU -DLIBOMPTARGET_NVPTX_ENABLE_BCLIB=ON -DLIBOMPTARGET_NVPTX_CUDA_COMPILER=$LLVM_PATH/bin/clang -DLLVM_BUILD_EXAMPLES=ON -DLLVM_ENABLE_ASSERTIONS=OFF $LLVM_SRC/llvm
+CC=gcc CXX=g++ cmake -G Ninja -DLLVM_USE_LINKER=gold -DLLVM_ENABLE_RTTI=ON -DCMAKE_BUILD_TYPE=DEBUG -DCMAKE_INSTALL_PREFIX=$LLVM_PATH -DLLVM_ENABLE_PROJECTS="mlir;clang;clang-tools-extra;compiler-rt;openmp;lldb" -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi" -DLLVM_TARGETS_TO_BUILD="host;NVPTX" $USE_GPU -DLIBOMPTARGET_NVPTX_ENABLE_BCLIB=ON -DLIBOMPTARGET_NVPTX_CUDA_COMPILER=$LLVM_PATH/bin/clang -DLLVM_BUILD_EXAMPLES=ON -DLLVM_ENABLE_ASSERTIONS=OFF $LLVM_SRC/llvm
 ninja -j6 -l6
 sudo ninja install -j6
 
