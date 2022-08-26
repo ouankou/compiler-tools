@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# LLVM 13+ requires GCC 11 or later to build.
-# ./opt_install_llvm.sh /scratch/awang15/llvm/opt-llvm14-gpu 14 70
+# LLVM 15+ requires GCC 12 or later to build.
+# ./opt_install_llvm.sh /scratch/awang15/llvm/opt-llvm-15 15 70
+# ./opt_install_llvm.sh ${HOME}/Projects/opt-llvm-15 15 86
 
 if [ -z "$1" ]; then
     LLVM=$HOME/llvm

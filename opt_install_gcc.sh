@@ -5,10 +5,10 @@
 #
 
 #BASE_DIR=/scratch/awang15/opt-gcc-11
-BASE_DIR=$HOME/Projects/opt-gcc-11
+BASE_DIR=$HOME/Projects/opt-gcc-12
 
 work_dir=${BASE_DIR}/offload/wrk
-install_dir=/opt/gcc/gcc-11.x-install
+install_dir=/opt/gcc/gcc-12.x-install
 sudo mkdir -p ${install_dir}
 
 # Location of the installed CUDA toolkit
@@ -30,7 +30,7 @@ cd ..
 
 # Set up the GCC source tree
 git clone git://sourceware.org/git/newlib-cygwin.git nvptx-newlib
-git clone --branch releases/gcc-11 git://gcc.gnu.org/git/gcc.git gcc
+git clone --branch releases/gcc-12 git://gcc.gnu.org/git/gcc.git gcc
 cd gcc
 contrib/download_prerequisites
 ln -s ../nvptx-newlib/newlib newlib
