@@ -1,15 +1,13 @@
 #!/bin/bash
 
-# Usage: source ./setup_gcc_env.sh /opt/gcc-12.x-instal
+# Usage: source ./setup_gcc_env.sh /opt/gcc/gcc-12.x-install
 
 if [ -z "$1" ]; then
-    echo "Please provide a location of GCC installation."
+    echo "Please provide a location of GCC installation, e.g. /opt/gcc/gcc-12.x-install"
     return -1 2>/dev/null
     exit -1
 else
-    cd $1
-    GCC_PATH=$(pwd)
-    cd -
+    GCC_PATH=$(cd $1; pwd)
 fi
 
 # Add GCC path
