@@ -1,18 +1,14 @@
 #!/bin/bash
 
+# source ./setup_llvm_env.sh /opt/llvm/llvm-15.x-install
+
 if [ -z "$1" ]; then
-    echo "Please provide a location of LLVM installation."
+    echo "Please provide a location of LLVM installation, e.g. /opt/llvm/llvm-15.x-install"
     return -1 2>/dev/null
     exit -1
 else
-    cd $1
-    LLVM=$(pwd)
-    cd -
+    LLVM_PATH=$(cd $1; pwd)
 fi
-
-export LLVM_SRC=$LLVM/llvm_src
-export LLVM_PATH=$LLVM/llvm_install
-export LLVM_BUILD=$LLVM/llvm_build
 
 export PATH=$LLVM_PATH/bin:$PATH
 export LD_LIBRARY_PATH=$LLVM_PATH/libexec:$LD_LIBRARY_PATH
