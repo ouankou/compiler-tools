@@ -10,7 +10,21 @@ Tools for rose development.
 
 #### With Tags:
 
-`sudo docker build -t rose-dev:0.1 .`
+`sudo docker build -t rosedev:0.1 . -f Dockerfile.2204`
+
+## Push/Pull ROSE Image:
+
+#### Tag the built image:
+
+`sudo docker tag rosedev:0.1 ouankou/rose:latest`
+
+#### Push the image:
+
+`sudo docker push ouankou/rose:latest`
+
+#### Pull the image:
+
+`sudo docker pull ouankou/rose:latest`
 
 
 ## Run Container:
