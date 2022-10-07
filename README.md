@@ -5,6 +5,13 @@ Tools for rose development.
 
 ## Installation
 
+## Build REX Image:
+
+```bash
+# The swarm mode must be enabled for using secrets.
+docker swarm init
+DOCKER_BUILDKIT=1 token=<content_of_github_token> docker build -t rexdev:0.1 . -f Dockerfile.rex --secret id=token,env=token
+```
 
 ## Build ROSE Image:
 
