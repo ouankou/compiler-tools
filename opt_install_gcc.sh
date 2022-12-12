@@ -4,16 +4,18 @@
 # Build GCC with support for offloading to NVIDIA GPUs.
 #
 
+GCC_VERSION=gcc-12
 #BASE_DIR=/scratch/awang15/opt-gcc-11
-BASE_DIR=$HOME/Projects/opt-gcc-12
+BASE_DIR=$HOME/Projects/opt-$GCC_VERSION
 
 work_dir=${BASE_DIR}/offload/wrk
-install_dir=/opt/gcc/gcc-12.x-install
+install_dir=/opt/gcc/$GCC_VERSION.x-install
 sudo mkdir -p ${install_dir}
 
 # Location of the installed CUDA toolkit
 #cuda=/usr/local/cuda
-cuda=/opt/nvidia/hpc_sdk/Linux_x86_64/22.1/cuda/11.5
+#cuda=/opt/nvidia/hpc_sdk/Linux_x86_64/22.11/cuda/11.8
+cuda=${CUDA_HOME}
 
 # Build assembler and linking tools
 mkdir -p $work_dir
@@ -30,7 +32,7 @@ cd ..
 
 # Set up the GCC source tree
 git clone git://sourceware.org/git/newlib-cygwin.git nvptx-newlib
-git clone --branch releases/gcc-12 git://gcc.gnu.org/git/gcc.git gcc
+git clone --branch releases/$GCC_VERSION git://gcc.gnu.org/git/gcc.git gcc
 cd gcc
 contrib/download_prerequisites
 ln -s ../nvptx-newlib/newlib newlib

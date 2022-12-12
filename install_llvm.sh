@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # LLVM 13+ requires GCC 11 or later to build.
-# ./install_llvm.sh $HOME/Projects/llvm 14 86
+# ./install_llvm.sh $HOME/Projects/llvm 15 86
+# ./install_llvm.sh $HOME/Projects/llvm "" 86
 
 if [ -z "$1" ]; then
     LLVM=$HOME/llvm
@@ -10,13 +11,19 @@ else
 fi
 
 if [ -z "$2" ]; then
-    LLVM_VERSION=10
+    LLVM_VERSION=main
 else
-    LLVM_VERSION=$2
+    LLVM_VERSION=release/$2.x
 fi
 
 if [ "$3" ]; then
     USE_GPU="-DCLANG_OPENMP_NVPTX_DEFAULT_ARCH=sm_$3 -DLIBOMPTARGET_NVPTX_COMPUTE_CAPABILITIES=$3"
+fi
+
+if [ -z "$4" ]; then
+    BUILD_VERSION=RELEASE
+else
+    BUILD_VERSION=DEBUG
 fi
 
 export LLVM_SRC=$LLVM/llvm_src
@@ -27,19 +34,19 @@ mkdir -p $LLVM_SRC
 mkdir -p $LLVM_PATH
 mkdir -p $LLVM_BUILD
 cd $LLVM_SRC
-git clone -b release/$LLVM_VERSION.x https://github.com/llvm/llvm-project .
+git clone -b $LLVM_VERSION https://github.com/llvm/llvm-project .
 cd $LLVM_BUILD
 if [ -z "$USE_GPU" ]; then
-    CC=gcc CXX=g++ cmake -G Ninja -DLLVM_USE_LINKER=gold -DLLVM_ENABLE_RTTI=ON -DCMAKE_BUILD_TYPE=DEBUG -DCMAKE_INSTALL_PREFIX=$LLVM_PATH -DLLVM_ENABLE_PROJECTS="mlir;clang;clang-tools-extra;compiler-rt;openmp;lldb" -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi" -DLLVM_BUILD_EXAMPLES=ON $LLVM_SRC/llvm
+    CC=gcc CXX=g++ cmake -G Ninja -DLLVM_USE_LINKER=gold -DLLVM_ENABLE_RTTI=ON -DCMAKE_BUILD_TYPE=$BUILD_VERSION -DCMAKE_INSTALL_PREFIX=$LLVM_PATH -DLLVM_ENABLE_PROJECTS="mlir;clang;clang-tools-extra;compiler-rt;openmp;lldb" -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi" -DLLVM_BUILD_EXAMPLES=ON $LLVM_SRC/llvm
 else
-    CC=gcc CXX=g++ cmake -G Ninja -DLLVM_USE_LINKER=gold -DLLVM_ENABLE_RTTI=ON -DCMAKE_BUILD_TYPE=DEBUG -DCMAKE_INSTALL_PREFIX=$LLVM_PATH -DLLVM_ENABLE_PROJECTS="mlir;clang;clang-tools-extra;compiler-rt;openmp;lldb" -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi" -DLLVM_TARGETS_TO_BUILD="host;NVPTX" $USE_GPU -DLLVM_BUILD_EXAMPLES=ON $LLVM_SRC/llvm
+    CC=gcc CXX=g++ cmake -G Ninja -DLLVM_USE_LINKER=gold -DLLVM_ENABLE_RTTI=ON -DCMAKE_BUILD_TYPE=$BUILD_VERSION -DCMAKE_INSTALL_PREFIX=$LLVM_PATH -DLLVM_ENABLE_PROJECTS="mlir;clang;clang-tools-extra;compiler-rt;openmp;lldb" -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi" -DLLVM_TARGETS_TO_BUILD="host;NVPTX" $USE_GPU -DLLVM_BUILD_EXAMPLES=ON $LLVM_SRC/llvm
 fi
 
 ninja -j6 -l6
 ninja install -j6
 
 if [ "$USE_GPU" ]; then
-    CC=gcc CXX=g++ cmake -G Ninja -DLLVM_USE_LINKER=gold -DLLVM_ENABLE_RTTI=ON -DCMAKE_BUILD_TYPE=DEBUG -DCMAKE_INSTALL_PREFIX=$LLVM_PATH -DLLVM_ENABLE_PROJECTS="mlir;clang;clang-tools-extra;compiler-rt;openmp;lldb" -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi" -DLLVM_TARGETS_TO_BUILD="host;NVPTX" $USE_GPU -DLIBOMPTARGET_NVPTX_ENABLE_BCLIB=ON -DLIBOMPTARGET_NVPTX_CUDA_COMPILER=$LLVM_PATH/bin/clang -DLLVM_BUILD_EXAMPLES=ON $LLVM_SRC/llvm
+    CC=gcc CXX=g++ cmake -G Ninja -DLLVM_USE_LINKER=gold -DLLVM_ENABLE_RTTI=ON -DCMAKE_BUILD_TYPE=$BUILD_VERSION -DCMAKE_INSTALL_PREFIX=$LLVM_PATH -DLLVM_ENABLE_PROJECTS="mlir;clang;clang-tools-extra;compiler-rt;openmp;lldb" -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi" -DLLVM_TARGETS_TO_BUILD="host;NVPTX" $USE_GPU -DLIBOMPTARGET_NVPTX_ENABLE_BCLIB=ON -DLIBOMPTARGET_NVPTX_CUDA_COMPILER=$LLVM_PATH/bin/clang -DLLVM_BUILD_EXAMPLES=ON $LLVM_SRC/llvm
     ninja -j6 -l6
     ninja install -j6
 fi
