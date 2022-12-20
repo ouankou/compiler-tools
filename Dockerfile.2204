@@ -10,7 +10,7 @@ RUN \
         apt-utils \
         dialog \
         software-properties-common && \
-    apt-get install -y openjdk-8-jdk && \
+    apt-get install -y openjdk-11-jdk && \
     apt-get install -y \ 
         automake \
         autotools-dev \
@@ -42,8 +42,8 @@ ENV LD_LIBRARY_PATH $ROSE_PATH/lib:$LD_LIBRARY_PATH
 ENV LIBRARY_PATH $ROSE_PATH/lib:$LIBRARY_PATH
 
 # Define commonly used JAVA_HOME variable
-ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
-ENV LD_LIBRARY_PATH $JAVA_HOME/jre/lib/amd64/server:/usr/lib/x86_64-linux-gnu
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
+ENV LD_LIBRARY_PATH $JAVA_HOME/lib/server:/usr/lib/x86_64-linux-gnu
 
 # Username doesn't need to be defined. The host user has to be passed into Docker for correct file permissions.
 RUN cd /opt && \
