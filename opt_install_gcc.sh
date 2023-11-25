@@ -4,8 +4,7 @@
 # Build GCC with support for offloading to NVIDIA GPUs.
 #
 
-GCC_VERSION=gcc-12
-#BASE_DIR=/scratch/awang15/opt-gcc-11
+GCC_VERSION=gcc-13
 BASE_DIR=$HOME/Projects/opt-$GCC_VERSION
 
 work_dir=${BASE_DIR}/offload/wrk

@@ -12,9 +12,9 @@ else
 fi
 
 if [ -z "$2" ]; then
-    LLVM_VERSION=main
+    LLVM_VERSION=""
 else
-    LLVM_VERSION=release/$2.x
+    LLVM_VERSION="-b release/$2.x"
 fi
 
 if [ "$3" ]; then
@@ -36,7 +36,7 @@ mkdir -p $LLVM_BUILD
 sudo mkdir -p $LLVM_PATH
 
 cd $LLVM_SRC
-git clone https://github.com/llvm/llvm-project .
+git clone $LLVM_VERSION https://github.com/llvm/llvm-project .
 cd $LLVM_BUILD
 cmake -G Ninja -DLLVM_USE_LINKER=gold -DLLVM_ENABLE_RTTI=ON -DCMAKE_BUILD_TYPE=$BUILD_VERSION -DCMAKE_INSTALL_PREFIX=$LLVM_PATH -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;compiler-rt;mlir;lldb" -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;openmp" -DOPENMP_ENABLE_LIBOMP_PROFILING=ON $USE_GPU -DLLVM_BUILD_EXAMPLES=ON $LLVM_SRC/llvm
 ninja -j18 -l18
