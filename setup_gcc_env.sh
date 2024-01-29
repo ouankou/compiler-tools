@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Usage: source ./setup_gcc_env.sh /opt/gcc/gcc-12.x-install
+# Usage: source ./setup_gcc_env.sh /opt/gcc/gcc-13.x-install
 
 if [ -z "$1" ]; then
-    echo "Please provide a location of GCC installation, e.g. /opt/gcc/gcc-12.x-install"
+    echo "Please provide a location of GCC installation, e.g. /opt/gcc/gcc-13.x-install"
     return -1 2>/dev/null
     exit -1
 else
