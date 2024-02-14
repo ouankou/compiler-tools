@@ -33,20 +33,21 @@ fi
 
 export LLVM_SRC=$LLVM/llvm_src
 export LLVM_BUILD=$LLVM/llvm_build
-export LLVM_PATH=$LLVM/llvm-install
+export LLVM_PATH=$LLVM/llvm_install
 
 mkdir -p $LLVM_SRC
 mkdir -p $LLVM_BUILD
-sudo mkdir -p $LLVM_PATH
+mkdir -p $LLVM_PATH
 
 cd $LLVM_SRC
 if [ -d llvm ]; then
     git pull
+    cd $LLVM_BUILD
 else
     git clone $LLVM_VERSION https://github.com/llvm/llvm-project .
+    cd $LLVM_BUILD
+    cmake -G Ninja -DLLVM_USE_LINKER=gold -DLLVM_BINUTILS_INCDIR=/usr/include -DLLVM_ENABLE_RTTI=ON -DCMAKE_BUILD_TYPE=$BUILD_VERSION -DCMAKE_INSTALL_PREFIX=$LLVM_PATH -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;compiler-rt;mlir;lldb" -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;openmp;libunwind" -DOPENMP_ENABLE_LIBOMP_PROFILING=ON $USE_GPU -DLLVM_BUILD_EXAMPLES=ON $LLVM_SRC/llvm
 fi
 
-cd $LLVM_BUILD
-cmake -G Ninja -DLLVM_USE_LINKER=gold -DLLVM_BINUTILS_INCDIR=/usr/include -DLLVM_ENABLE_RTTI=ON -DCMAKE_BUILD_TYPE=$BUILD_VERSION -DCMAKE_INSTALL_PREFIX=$LLVM_PATH -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;compiler-rt;mlir;lldb" -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;openmp;libunwind" -DOPENMP_ENABLE_LIBOMP_PROFILING=ON $USE_GPU -DLLVM_BUILD_EXAMPLES=ON $LLVM_SRC/llvm
 ninja -j$NUM_THREADS -l$NUM_THREADS
 ninja install -j$NUM_THREADS
