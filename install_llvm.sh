@@ -6,6 +6,7 @@
 # CC=gcc-12 CXX=g++-12 ./install_llvm.sh ${HOME}/Projects/opt-llvm-18 18 89
 
 NUM_THREADS=$(nproc)
+TRIPLET=$(gcc -dumpmachine)
 
 if [ -z "$1" ]; then
     LLVM=$HOME/llvm
@@ -46,7 +47,20 @@ if [ -d llvm ]; then
 else
     git clone $LLVM_VERSION https://github.com/llvm/llvm-project .
     cd $LLVM_BUILD
-    cmake -G Ninja -DLLVM_USE_LINKER=gold -DLLVM_BINUTILS_INCDIR=/usr/include -DLLVM_ENABLE_RTTI=ON -DCMAKE_BUILD_TYPE=$BUILD_VERSION -DCMAKE_INSTALL_PREFIX=$LLVM_PATH -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;compiler-rt;mlir;lldb" -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;openmp;libunwind" -DOPENMP_ENABLE_LIBOMP_PROFILING=ON $USE_GPU -DLLVM_BUILD_EXAMPLES=ON $LLVM_SRC/llvm
+    cmake -G Ninja \
+      -DLLVM_USE_LINKER=mold \
+      -DLLVM_BINUTILS_INCDIR=/usr/include \
+      -DLLVM_ENABLE_RTTI=ON \
+      -DCMAKE_BUILD_TYPE=$BUILD_VERSION \
+      -DCMAKE_INSTALL_PREFIX=$LLVM_PATH \
+      -DCMAKE_C_COMPILER_TARGET=$TRIPLET \
+      -DCMAKE_CXX_COMPILER_TARGET=$TRIPLET \
+      -DLLVM_DEFAULT_TARGET_TRIPLE=$TRIPLET \
+      -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;compiler-rt;mlir;lldb" \
+      -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;openmp;libunwind" \
+      -DOPENMP_ENABLE_LIBOMP_PROFILING=ON \
+      $USE_GPU \
+      $LLVM_SRC/llvm
 fi
 
 ninja -j$NUM_THREADS -l$NUM_THREADS
