@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # LLVM 17+ requires GCC 12 or later to build.
-# ./install_llvm.sh $HOME/Projects/llvm 18 89
+# ./install_llvm.sh $HOME/Projects/llvm 19 89
 # ./install_llvm.sh $HOME/Projects/llvm "" 89
-# CC=gcc-12 CXX=g++-12 ./install_llvm.sh ${HOME}/Projects/opt-llvm-18 18 89
+# CC=gcc-12 CXX=g++-12 ./install_llvm.sh ${HOME}/Projects/opt-llvm-19 19 89
 
 NUM_THREADS=$(nproc)
 TRIPLE=$(gcc -dumpmachine)
@@ -56,13 +56,9 @@ if [ ! -d llvm ]; then
       -DCMAKE_INSTALL_PREFIX=$LLVM_PATH \
       -DLLVM_BINUTILS_INCDIR=/usr/include \
       -DLLVM_BUILD_DOCS=OFF \
-      -DLLVM_BUILD_LLVM_DYLIB=ON \
       -DLLVM_DEFAULT_TARGET_TRIPLE=$TRIPLE \
-      -DLLVM_ENABLE_FFI=ON \
       -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;compiler-rt;lld" \
-      -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;openmp;libunwind" \
-      -DLLVM_INSTALL_UTILS=ON \
-      -DLLVM_LINK_LLVM_DYLIB=ON \
+      -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;openmp;libunwind;offload" \
       -DLLVM_USE_LINKER=mold \
       -DOPENMP_ENABLE_LIBOMP_PROFILING=ON \
       $USE_GPU \
