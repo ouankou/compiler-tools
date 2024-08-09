@@ -20,10 +20,12 @@ else
     LLVM_VERSION="-b release/$2.x"
 fi
 
-if [ "$3" ]; then
-    USE_GPU="-DLLVM_TARGETS_TO_BUILD='host;NVPTX' -DLIBOMPTARGET_ENABLE_DEBUG=ON -DLIBOMPTARGET_BUILD_DEVICERTL_BCLIB=ON"
-else
+LLVM_RUNTIMES="libcxx;libcxxabi;openmp;libunwind"
+if [ -z "$3" ]; then
     USE_GPU=""
+else
+    USE_GPU="-DLLVM_TARGETS_TO_BUILD='host;NVPTX' -DLIBOMPTARGET_ENABLE_DEBUG=ON -DLIBOMPTARGET_BUILD_DEVICERTL_BCLIB=ON"
+    LLVM_RUNTIMES="$LLVM_RUNTIMES;offload"
 fi
 
 if [ -z "$4" ]; then
@@ -58,7 +60,7 @@ if [ ! -d llvm ]; then
       -DLLVM_BUILD_DOCS=OFF \
       -DLLVM_DEFAULT_TARGET_TRIPLE=$TRIPLE \
       -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;compiler-rt;lld" \
-      -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;openmp;libunwind;offload" \
+      -DLLVM_ENABLE_RUNTIMES="$LLVM_RUNTIMES" \
       -DLLVM_USE_LINKER=mold \
       -DOPENMP_ENABLE_LIBOMP_PROFILING=ON \
       $USE_GPU \
