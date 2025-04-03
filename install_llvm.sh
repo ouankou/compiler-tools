@@ -5,7 +5,8 @@
 # ./install_llvm.sh $HOME/Projects/llvm "" 1
 # CC=gcc-12 CXX=g++-12 ./install_llvm.sh ${HOME}/Projects/llvm-20 20 1
 
-NUM_THREADS=$(nproc)
+NPROC=$(nproc)
+NUM_THREADS=$(( NPROC > 1 ? NPROC - 1 : 1 ))
 TRIPLE=$(gcc -dumpmachine)
 
 if [ -z "$1" ]; then
