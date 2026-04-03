@@ -128,6 +128,31 @@ cache_entry_equals() {
     ' "$cache_path"
 }
 
+extract_cmake_set_value() {
+    local file_path="$1"
+    local variable_name="$2"
+
+    sed -nE "s/^[[:space:]]*set\\(${variable_name}[[:space:]]+\"?([^\" )]+)\"?\\).*/\\1/p" "$file_path" | sed -n '1p'
+}
+
+read_llvm_source_version() {
+    local version_file="$1"
+    local major_version
+    local minor_version
+    local patch_version
+
+    major_version=$(extract_cmake_set_value "$version_file" "LLVM_VERSION_MAJOR")
+    minor_version=$(extract_cmake_set_value "$version_file" "LLVM_VERSION_MINOR")
+    patch_version=$(extract_cmake_set_value "$version_file" "LLVM_VERSION_PATCH")
+
+    if [[ -z "$major_version" || -z "$minor_version" || -z "$patch_version" ]]; then
+        echo "Unable to determine the LLVM source version from $version_file" >&2
+        return 1
+    fi
+
+    printf '%s.%s.%s\n' "$major_version" "$minor_version" "$patch_version"
+}
+
 llvm_cache_matches_requested_config() {
     local cache_path="$1"
     local expected
@@ -161,6 +186,76 @@ llvm_cache_matches_requested_config() {
         local expected_value="${expected#*=}"
         if ! cache_entry_equals "$cache_path" "$expected_key" "$expected_value"; then
             return 1
+        fi
+    done
+
+    return 0
+}
+
+compiler_cache_matches_requested_version() {
+    local compiler_cache_path="$1"
+    local compiler_version_key=""
+
+    case "$(basename "$compiler_cache_path")" in
+        CMakeCCompiler.cmake)
+            compiler_version_key="CMAKE_C_COMPILER_VERSION"
+            ;;
+        CMakeCXXCompiler.cmake)
+            compiler_version_key="CMAKE_CXX_COMPILER_VERSION"
+            ;;
+        CMakeFortranCompiler.cmake)
+            compiler_version_key="CMAKE_Fortran_COMPILER_VERSION"
+            ;;
+        *)
+            return 0
+            ;;
+    esac
+
+    grep -Fq "set(${compiler_version_key} \"$LLVM_SOURCE_VERSION\")" "$compiler_cache_path"
+}
+
+llvm_external_build_version_matches_requested_config() {
+    local external_build_dir="$1"
+    local compiler_cache_path
+
+    [[ -d "$external_build_dir" ]] || return 0
+
+    if [[ -f "$external_build_dir/CMakeCache.txt" ]] && \
+        ! cache_entry_equals "$external_build_dir/CMakeCache.txt" "PACKAGE_VERSION" "$LLVM_SOURCE_VERSION"; then
+        return 1
+    fi
+
+    [[ -d "$external_build_dir/CMakeFiles" ]] || return 0
+
+    while IFS= read -r compiler_cache_path; do
+        if ! compiler_cache_matches_requested_version "$compiler_cache_path"; then
+            return 1
+        fi
+    done < <(find "$external_build_dir/CMakeFiles" -maxdepth 2 -type f \( \
+        -name 'CMakeCCompiler.cmake' -o \
+        -name 'CMakeCXXCompiler.cmake' -o \
+        -name 'CMakeFortranCompiler.cmake' \
+    \) | sort)
+
+    return 0
+}
+
+cleanup_stale_llvm_external_builds() {
+    local external_build_root="$1"
+    local external_project_root="$2"
+    local external_build_dir
+    local external_build_dirs=(
+        "$external_build_root/builtins-bins"
+        "$external_build_root/builtins-nvptx64-nvidia-cuda-bins"
+        "$external_build_root/runtimes-bins"
+        "$external_build_root/runtimes-nvptx64-nvidia-cuda-bins"
+    )
+
+    for external_build_dir in "${external_build_dirs[@]}"; do
+        if ! llvm_external_build_version_matches_requested_config "$external_build_dir"; then
+            echo "Detected stale LLVM runtimes cache for source version $LLVM_SOURCE_VERSION. Removing $external_build_root and $external_project_root"
+            rm -rf "$external_build_root" "$external_project_root"
+            return 0
         fi
     done
 
@@ -247,6 +342,8 @@ else
     LLVM_TARGET_TRIPLE="$GNU_TRIPLE"
 fi
 
+LLVM_SOURCE_VERSION=$(read_llvm_source_version "$LLVM_SRC/cmake/Modules/LLVMVersion.cmake")
+
 LLVM_PROJECTS=${LLVM_PROJECTS:-clang;clang-tools-extra;lld}
 LLVM_RUNTIMES=${LLVM_RUNTIMES:-compiler-rt;libunwind;libcxx;libcxxabi;openmp}
 append_cmake_list_item LLVM_PROJECTS flang
@@ -325,6 +422,8 @@ if [[ -f "$cache_path" ]] && ! llvm_cache_matches_requested_config "$cache_path"
     rm -rf "$LLVM_BUILD"
     mkdir -p "$LLVM_BUILD"
 fi
+
+cleanup_stale_llvm_external_builds "$LLVM_BUILD/runtimes" "$LLVM_BUILD/projects"
 
 echo "Configuring LLVM:"
 printf '  %q\n' env -u C_INCLUDE_PATH -u CPLUS_INCLUDE_PATH -u CPATH -u LIBRARY_PATH -u LD_LIBRARY_PATH cmake "${cmake_args[@]}"
